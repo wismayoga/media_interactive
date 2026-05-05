@@ -22,67 +22,80 @@ class SimulasiScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Simulasi")),
-      body: Padding(
+      body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        child: GridView.builder(
-          itemCount: simulasiList.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.8,
-          ),
-          itemBuilder: (context, index) {
-            final item = simulasiList[index];
+        itemCount: simulasiList.length,
+        itemBuilder: (context, index) {
+          final item = simulasiList[index];
 
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => item['screen'] as Widget),
-                );
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
+          return Center(
+            child: SizedBox(
+              width: 350,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => item['screen'] as Widget),
+                  );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                      child: Image.asset(
-                        item['image'] as String,
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                    ],
+                  ),
+
+                  // 🔥 ROW (KIRI - KANAN)
+                  child: Row(
+                    children: [
+                      // 🔥 GAMBAR (KIRI)
+                      Container(
+                        width: 90,
+                        height: 90,
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Image.asset(
+                          item['image'] as String,
+                          fit: BoxFit.contain, // 🔥 tidak crop
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        item['title'] as String,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+
+                      const SizedBox(width: 16),
+
+                      // 🔤 TEXT (KANAN)
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item['title'] as String,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

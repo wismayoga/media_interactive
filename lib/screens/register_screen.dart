@@ -3,65 +3,87 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
-import 'dashboard_screen.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
+  final nameC = TextEditingController();
   final emailC = TextEditingController();
   final passC = TextEditingController();
+  final confirmC = TextEditingController();
 
   bool _obscure = true;
+  bool _obscureConfirm = true;
+  bool _isLoading = false;
 
-  Future<void> login() async {
-    final auth = context.read<AuthProvider>();
+  Future<void> register() async {
+    final name = nameC.text.trim();
+    final email = emailC.text.trim();
+    final pass = passC.text;
+    final confirm = confirmC.text;
+
+    if (name.isEmpty || email.isEmpty || pass.isEmpty || confirm.isEmpty) {
+      _snack("Semua field wajib diisi");
+      return;
+    }
+
+    if (pass.length < 6) {
+      _snack("Password minimal 6 karakter");
+      return;
+    }
+
+    if (pass != confirm) {
+      _snack("Konfirmasi password tidak sama");
+      return;
+    }
+
+    setState(() => _isLoading = true);
 
     try {
-      await auth.login(emailC.text.trim(), passC.text);
+      await context.read<AuthProvider>().register(
+        name: name,
+        email: email,
+        password: pass,
+      );
 
       if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      );
+      _snack("Registrasi berhasil, silakan login");
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Login gagal: $e")));
+      String msg = "Registrasi gagal";
+      if (e.toString().toLowerCase().contains("email")) {
+        msg = "Email sudah digunakan";
+      }
+
+      _snack(msg);
     }
+
+    if (mounted) setState(() => _isLoading = false);
   }
 
-  void showForgotPassword() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Lupa Password"),
-        content: const Text(
-          "Silakan hubungi guru pengajar untuk reset password.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Tutup"),
-          ),
-        ],
-      ),
-    );
+  void _snack(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  @override
+  void dispose() {
+    nameC.dispose();
+    emailC.dispose();
+    passC.dispose();
+    confirmC.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-
     return Scaffold(
       body: Stack(
         children: [
@@ -70,8 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color(0xFF2196F3), // biru atas
-                  Color.fromARGB(255, 183, 58, 166), // ungu bawah
+                  Color(0xFF2196F3), // biru
+                  Color.fromARGB(255, 183, 58, 166), // ungu
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -79,18 +101,16 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // 🔥 CONTENT
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
                   // 🔥 LOGO
-                  Image.asset("assets/images/logo.png", height: 100),
+                  Image.asset("assets/images/logo.png", height: 90),
 
                   const SizedBox(height: 10),
 
-                  // 🔤 APP NAME
                   const Text(
                     "RakitanKU",
                     style: TextStyle(
@@ -102,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 30),
 
-                  // 🔥 GLASS CONTAINER
+                  // 🔥 GLASS CARD
                   ClipRRect(
                     borderRadius: BorderRadius.circular(25),
                     child: BackdropFilter(
@@ -111,27 +131,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(25),
-
-                          // 🔥 warna kaca
                           color: Colors.white.withOpacity(0.1),
 
-                          // 🔥 efek gradient kaca
                           gradient: LinearGradient(
                             colors: [
                               Colors.white.withOpacity(0.25),
                               Colors.white.withOpacity(0.05),
                             ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
                           ),
 
-                          // 🔥 border kaca
                           border: Border.all(
                             color: Colors.white.withOpacity(0.3),
-                            width: 1,
                           ),
 
-                          // 🔥 shadow biar floating
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -142,16 +154,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: Column(
                           children: [
-                            Text(
-                              "Masuk ke akun kamu",
+                            const Text(
+                              "Buat akun baru",
                               style: TextStyle(
                                 fontSize: 18,
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white.withOpacity(0.5),
                               ),
                             ),
 
                             const SizedBox(height: 20),
+
+                            // 👤 NAME
+                            TextField(
+                              controller: nameC,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: _input("Nama", Icons.person),
+                            ),
+
+                            const SizedBox(height: 16),
 
                             // 📧 EMAIL
                             TextField(
@@ -183,13 +204,42 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                             ),
 
+                            const SizedBox(height: 16),
+
+                            // 🔒 CONFIRM
+                            TextField(
+                              controller: confirmC,
+                              obscureText: _obscureConfirm,
+                              style: const TextStyle(color: Colors.white),
+                              decoration:
+                                  _input(
+                                    "Konfirmasi Password",
+                                    Icons.lock,
+                                  ).copyWith(
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscureConfirm
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(
+                                          () => _obscureConfirm =
+                                              !_obscureConfirm,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                            ),
+
                             const SizedBox(height: 20),
 
-                            // 🔥 BUTTON LOGIN
+                            // 🔥 BUTTON
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: auth.isLoading ? null : login,
+                                onPressed: _isLoading ? null : register,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   foregroundColor: Colors.deepPurple,
@@ -200,44 +250,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: auth.isLoading
+                                child: _isLoading
                                     ? const CircularProgressIndicator(
                                         color: Colors.deepPurple,
                                       )
-                                    : const Text("Login"),
+                                    : const Text("Daftar"),
                               ),
                             ),
 
                             const SizedBox(height: 10),
 
-                            // 🔗 FOOTER
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                TextButton(
-                                  onPressed: showForgotPassword,
-                                  child: Text(
-                                    "Lupa Password?",
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.7),
-                                    ),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const RegisterScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text(
-                                    "Daftar",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ],
+                            // 🔗 BACK LOGIN
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text(
+                                "Sudah punya akun? Login",
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
                           ],
                         ),
@@ -252,22 +281,22 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-}
 
-InputDecoration _input(String hint, IconData icon) {
-  return InputDecoration(
-    hintText: hint,
-    hintStyle: const TextStyle(color: Colors.white70),
-    prefixIcon: Icon(icon, color: Colors.white),
-    filled: true,
-    fillColor: Colors.white.withOpacity(0.1),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Colors.white),
-    ),
-  );
+  InputDecoration _input(String hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Colors.white70),
+      prefixIcon: Icon(icon, color: Colors.white),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.1),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.white),
+      ),
+    );
+  }
 }

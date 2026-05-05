@@ -12,80 +12,71 @@ class _SimulasiCrossScreenState extends State<SimulasiCrossScreen> {
   List<Color?> ujungA = List.filled(8, null);
   List<Color?> ujungB = List.filled(8, null);
 
-  bool selesai = false;
-
   final List<Map<String, dynamic>> warna = [
-    {'nama': 'Putih-Orange', 'color': Colors.orange.shade100},
+    {'nama': 'Putih-Orange', 'color': Color(0xFFEED2A2)},
     {'nama': 'Orange', 'color': Colors.orange},
-    {'nama': 'Putih-Hijau', 'color': Colors.green.shade100},
+    {'nama': 'Putih-Hijau', 'color': Color(0xFFB8D2B6)},
     {'nama': 'Hijau', 'color': Colors.green},
-    {'nama': 'Putih-Biru', 'color': Colors.blue.shade100},
+    {'nama': 'Putih-Biru', 'color': Color(0xFFA9C7E2)},
     {'nama': 'Biru', 'color': Colors.blue},
-    {'nama': 'Putih-Coklat', 'color': Colors.brown.shade200},
+    {'nama': 'Putih-Coklat', 'color': Color(0xFFBBAEA8)},
     {'nama': 'Coklat', 'color': Colors.brown},
   ];
 
-  // 🔥 Ujung A (T568A)
+  // 🔥 CROSS
+  // A = T568A
   final List<Color> orderA = [
-    Colors.green.shade100,
+    Color(0xFFB8D2B6),
     Colors.green,
-    Colors.orange.shade100,
+    Color(0xFFEED2A2),
     Colors.blue,
-    Colors.blue.shade100,
+    Color(0xFFA9C7E2),
     Colors.orange,
-    Colors.brown.shade200,
+    Color(0xFFBBAEA8),
     Colors.brown,
   ];
 
-  // 🔥 Ujung B (T568B)
+  // B = T568B
   final List<Color> orderB = [
-    Colors.orange.shade100,
+    Color(0xFFEED2A2),
     Colors.orange,
-    Colors.green.shade100,
+    Color(0xFFB8D2B6),
     Colors.blue,
-    Colors.blue.shade100,
+    Color(0xFFA9C7E2),
     Colors.green,
-    Colors.brown.shade200,
+    Color(0xFFBBAEA8),
     Colors.brown,
   ];
 
-  bool isColorUsed(Color color) {
-    return ujungA.contains(color) || ujungB.contains(color);
+  void resetAll() {
+    setState(() {
+      ujungA = List.filled(8, null);
+      ujungB = List.filled(8, null);
+    });
   }
 
-  void cekHasil() {
+  void cek() {
     if (ujungA.contains(null) || ujungB.contains(null)) {
-      _showDialog("Belum lengkap", "Isi semua slot pada Ujung A dan Ujung B.");
+      dialog("Belum Lengkap", "Isi semua slot terlebih dahulu.");
       return;
     }
 
-    final benar = _listEquals(ujungA, orderA) && _listEquals(ujungB, orderB);
+    bool benar = _same(ujungA, orderA) && _same(ujungB, orderB);
 
-    if (benar) selesai = true;
-
-    _showDialog(
+    dialog(
       benar ? "🎉 Benar!" : "❌ Salah!",
-      benar ? "Kabel Cross sudah benar!" : "Coba lagi.",
-      showReset: !benar,
+      benar ? "Susunan kabel cross sudah tepat." : "Coba lagi.",
     );
   }
 
-  bool _listEquals(List<Color?> a, List<Color> b) {
+  bool _same(List<Color?> a, List<Color> b) {
     for (int i = 0; i < a.length; i++) {
-      if (a[i] == null || a[i] != b[i]) return false;
+      if (a[i] != b[i]) return false;
     }
     return true;
   }
 
-  void _resetAll() {
-    setState(() {
-      ujungA = List.filled(8, null);
-      ujungB = List.filled(8, null);
-      selesai = false;
-    });
-  }
-
-  void _showDialog(String title, String msg, {bool showReset = false}) {
+  void dialog(String title, String msg) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -96,14 +87,6 @@ class _SimulasiCrossScreenState extends State<SimulasiCrossScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text("OK"),
           ),
-          if (showReset)
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _resetAll();
-              },
-              child: const Text("Reset"),
-            ),
         ],
       ),
     );
@@ -111,59 +94,99 @@ class _SimulasiCrossScreenState extends State<SimulasiCrossScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double slotSize = 50;
+    const double slot = 40;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Simulasi Kabel Cross")),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
+      backgroundColor: const Color(0xFFF4EFF5),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: const Color(0xFFF4EFF5),
+        foregroundColor: Colors.black,
+        centerTitle: true,
+        title: const Text(
+          "Simulasi Kabel Cross",
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(14),
         child: Column(
           children: [
-            const Text(
-              "Susun kabel Cross (A=T568A, B=T568B)",
-              style: TextStyle(fontSize: 13),
-            ),
-
-            const SizedBox(height: 10),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _visualColumn("Ujung A (T568A)", ujungA),
-                _visualColumn("Ujung B (T568B)", ujungB),
+                _visual("Ujung A (T568A)", ujungA),
+                _visual("Ujung B (T568B)", ujungB),
               ],
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
 
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 4,
-              mainAxisSpacing: 6,
-              crossAxisSpacing: 6,
-              children: warna.map((w) => _draggable(w)).toList(),
+            const Text(
+              "Visualisasi koneksi: Cross (A ↔ B)",
+              style: TextStyle(fontSize: 15),
             ),
 
-            const SizedBox(height: 10),
-
-            _dropRow("Ujung A", ujungA, slotSize),
-            const SizedBox(height: 8),
-            _dropRow("Ujung B", ujungB, slotSize),
-
             const SizedBox(height: 12),
+
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white54,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 4,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 1.1,
+                children: warna.map((e) => _drag(e)).toList(),
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            _dropArea("Ujung A", ujungA, slot),
+
+            const SizedBox(height: 16),
+
+            _dropArea("Ujung B", ujungB, slot),
+
+            const SizedBox(height: 24),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
-                  onPressed: _resetAll,
+                  onPressed: resetAll,
                   icon: const Icon(Icons.refresh),
                   label: const Text("Reset"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.deepPurple,
+                    elevation: 3,
+                    minimumSize: const Size(140, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: cekHasil,
+                  onPressed: cek,
                   icon: const Icon(Icons.check),
-                  label: const Text("Cek"),
+                  label: const Text("Cek Hasil"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.deepPurple,
+                    elevation: 3,
+                    minimumSize: const Size(150, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -173,66 +196,90 @@ class _SimulasiCrossScreenState extends State<SimulasiCrossScreen> {
     );
   }
 
-  Widget _visualColumn(String title, List<Color?> list) {
+  Widget _visual(String title, List<Color?> data) {
     return Column(
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 6),
-        Column(
-          children: List.generate(8, (i) {
-            return Row(
-              children: [
-                Container(
-                  width: 14,
-                  height: 14,
-                  margin: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: list[i] ?? Colors.grey.shade300,
-                    shape: BoxShape.circle,
-                  ),
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: 118,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white38,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.black12),
+          ),
+          child: Column(
+            children: List.generate(
+              8,
+              (i) => Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 1.5,
+                  horizontal: 8,
                 ),
-                Text("P${i + 1}", style: const TextStyle(fontSize: 12)),
-              ],
-            );
-          }),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 15,
+                      height: 15,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: data[i] ?? Colors.transparent,
+                        border: Border.all(color: Colors.black26),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text("P${i + 1}", style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _dropRow(String title, List<Color?> target, double size) {
+  Widget _dropArea(String title, List<Color?> target, double size) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        const SizedBox(height: 10),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(
             8,
             (i) => DragTarget<Color>(
-              onWillAccept: (c) => !selesai && target[i] == null,
-              onAccept: (c) => setState(() => target[i] = c),
-              builder: (context, candidate, rejected) {
+              onWillAccept: (c) => target[i] == null,
+              onAccept: (c) {
+                setState(() {
+                  target[i] = c;
+                });
+              },
+              builder: (context, cand, rej) {
                 return GestureDetector(
-                  onDoubleTap: () => setState(() => target[i] = null),
+                  onDoubleTap: () {
+                    setState(() {
+                      target[i] = null;
+                    });
+                  },
                   child: Container(
-                    width: size,
-                    height: size,
-                    margin: const EdgeInsets.all(4),
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: target[i] ?? Colors.grey.shade200,
+                      color: target[i] ?? Colors.white38,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: candidate.isNotEmpty
-                            ? Colors.blue
-                            : Colors.black26,
-                      ),
+                      border: Border.all(color: Colors.black26),
                     ),
-                    alignment: Alignment.center,
                     child: target[i] == null
-                        ? Text(
-                            "${i + 1}",
-                            style: const TextStyle(color: Colors.grey),
-                          )
+                        ? const Icon(Icons.add, size: 18, color: Colors.black45)
                         : null,
                   ),
                 );
@@ -244,41 +291,45 @@ class _SimulasiCrossScreenState extends State<SimulasiCrossScreen> {
     );
   }
 
-  Widget _draggable(Map<String, dynamic> w) {
-    final color = w['color'];
+  Widget _drag(Map<String, dynamic> item) {
+    final color = item['color'] as Color;
 
     return Draggable<Color>(
       data: color,
-      feedback: Material(color: Colors.transparent, child: _colorBox(w)),
-      childWhenDragging: Opacity(opacity: 0.3, child: _colorBox(w)),
-      child: Opacity(
-        opacity: isColorUsed(color) ? 0.3 : 1,
-        child: _colorBox(w),
+      feedback: Material(
+        color: Colors.transparent,
+        child: SizedBox(width: 82, height: 70, child: _box(item)),
       ),
+      childWhenDragging: Opacity(opacity: 0.35, child: _box(item)),
+      child: _box(item),
     );
   }
 
-  Widget _colorBox(Map<String, dynamic> w) {
+  Widget _box(Map<String, dynamic> item) {
+    final color = item['color'] as Color;
+
     return Container(
-      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: w['color'],
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.black26),
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black12),
       ),
       alignment: Alignment.center,
-      child: Text(
-        w['nama'],
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 11,
-          color: useWhiteForeground(w['color']) ? Colors.white : Colors.black,
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Text(
+          item['nama'],
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 11,
+            color: useWhite(color) ? Colors.white : Colors.black,
+          ),
         ),
       ),
     );
   }
 
-  bool useWhiteForeground(Color c) {
+  bool useWhite(Color c) {
     final v = sqrt(
       c.red * c.red * 0.299 +
           c.green * c.green * 0.587 +

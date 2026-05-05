@@ -7,76 +7,72 @@ class VideoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final videos = [
-      {
-        "title": "Kabel LAN Cross",
-        "url":
-            "https://drive.google.com/file/d/1zekeTVry3MkJyi7g_HpFX-SIGYhavnmp/view?usp=drive_link",
-        "image": "assets/images/cross_lan.png",
-      },
-      {
-        "title": "Kabel LAN Straight",
-        "url":
-            "https://drive.google.com/file/d/16AVDxQCNzTVHBtEMjIsIfNnRTjTPAoiX/view?usp=drive_link",
-        "image": "assets/images/straight_lan.png",
-      },
+      {"title": "Kabel LAN Cross", "videoId": "dOqm495Inng"},
+      {"title": "Kabel LAN Straight", "videoId": "ictWNhVKtmY"},
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Video Pembelajaran")),
+      backgroundColor: const Color(0xFFF4EFF5),
+      appBar: AppBar(
+        title: const Text("Video Pembelajaran"),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+
       body: ListView.builder(
+        padding: const EdgeInsets.all(16),
         itemCount: videos.length,
         itemBuilder: (context, index) {
           final video = videos[index];
 
           return Card(
-            margin: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 16),
+            elevation: 5,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(18),
             ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(18),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => VideoPlayerScreen(
                       title: video['title']!,
-                      url: video['url']!,
+                      videoId: video['videoId']!,
                     ),
                   ),
                 );
               },
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🔥 GAMBAR (ASSET)
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
+                  Container(
+                    height: 180,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(18),
+                      ),
                     ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Image.asset(
-                          video['image']!,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue.withOpacity(0.35),
                         ),
-
-                        // ▶️ ICON PLAY
-                        const Icon(
-                          Icons.play_circle_fill,
-                          size: 60,
+                        child: const Icon(
+                          Icons.play_arrow,
+                          size: 54,
                           color: Colors.white,
                         ),
-                      ],
+                      ),
                     ),
                   ),
 
-                  // 🔤 TITLE
                   Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     child: Text(
                       video['title']!,
                       style: const TextStyle(

@@ -7,12 +7,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/materi_provider.dart';
-import '../models/materi_model.dart';
-import 'show_pdf_screen.dart';
 import '../core/api/api_service.dart';
+import 'show_pdf_screen.dart';
 
 class MateriScreen extends StatefulWidget {
-  const MateriScreen({super.key});
+  final String? filterType; // cp / tp / materi
+
+  const MateriScreen({super.key, this.filterType});
 
   @override
   State<MateriScreen> createState() => _MateriScreenState();
@@ -35,112 +36,153 @@ class _MateriScreenState extends State<MateriScreen> {
   Widget build(BuildContext context) {
     final materiProv = context.watch<MateriProvider>();
 
+    final data = materiProv.materi.where((item) {
+      if (widget.filterType == null) return true;
+
+      final type = (item.type ?? '').toLowerCase();
+      return type == widget.filterType!.toLowerCase();
+    }).toList();
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF4EFF5),
       appBar: AppBar(
-        title: const Text("List Materi"),
+        title: Text(
+          widget.filterType == null
+              ? "Materi"
+              : widget.filterType!.toUpperCase(),
+        ),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
       body: materiProv.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : materiProv.materi.isEmpty
-          ? const Center(child: Text("Tidak ada materi"))
+          : data.isEmpty
+          ? const Center(child: Text("Tidak ada data"))
           : Padding(
               padding: const EdgeInsets.all(16),
               child: GridView.builder(
-                itemCount: materiProv.materi.length,
+                itemCount: data.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 0.70,
+                  childAspectRatio: 0.78,
                 ),
                 itemBuilder: (context, index) {
-                  final item = materiProv.materi[index];
+                  final item = data[index];
 
-                  return Card(
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF1E88E5), Color(0xFF42C5F5)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(14),
                       child: Column(
                         children: [
-                          const Icon(Icons.menu_book_rounded, size: 42),
-                          const SizedBox(height: 10),
+                          // 🔥 ICON
+                          Container(
+                            width: 62,
+                            height: 62,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.18),
+                            ),
+                            child: const Icon(
+                              Icons.menu_book_rounded,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
 
                           Expanded(
                             child: Text(
                               item.title,
                               textAlign: TextAlign.center,
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
                             ),
                           ),
 
                           const SizedBox(height: 10),
 
-                          Column(
-                            children: [
-                              // 📄 PDF BUTTON
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _downloading
-                                      ? null
-                                      : () async {
-                                          if (item.pdfUrl == null) return;
+                          // 🔥 BUTTON PDF
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _downloading
+                                  ? null
+                                  : () async {
+                                      if (item.pdfUrl == null) return;
 
-                                          final messenger =
-                                              ScaffoldMessenger.of(context);
+                                      final messenger = ScaffoldMessenger.of(
+                                        context,
+                                      );
 
-                                          try {
-                                            await _downloadAndOpenPdf(
-                                              context,
-                                              item.pdfUrl!,
-                                              item.title,
-                                              messenger,
-                                            );
-                                          } catch (e) {
-                                            messenger.showSnackBar(
-                                              SnackBar(
-                                                content: Text("Error: $e"),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                  child: const Text("Lihat PDF"),
+                                      await _downloadAndOpenPdf(
+                                        context,
+                                        item.pdfUrl!,
+                                        item.title,
+                                        messenger,
+                                      );
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
+                              child: const Text("PDF"),
+                            ),
+                          ),
 
-                              const SizedBox(height: 8),
+                          const SizedBox(height: 8),
 
-                              // 💬 DISKUSI BUTTON
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: item.hasGroup
-                                      ? () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => DiscussionScreen(
-                                                groupId: item.groupId!,
-                                                title: item.title,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      : null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                  ),
-                                  child: const Text("Diskusi"),
+                          // 🔥 BUTTON DISKUSI
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: item.hasGroup
+                                  ? () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DiscussionScreen(
+                                            groupId: item.groupId!,
+                                            title: item.title,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white.withOpacity(0.20),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                            ],
+                              child: const Text("Diskusi"),
+                            ),
                           ),
                         ],
                       ),
@@ -152,7 +194,7 @@ class _MateriScreenState extends State<MateriScreen> {
     );
   }
 
-  // 🔥 DOWNLOAD + OPEN PDF
+  // 🔥 DOWNLOAD PDF
   Future<void> _downloadAndOpenPdf(
     BuildContext context,
     String rawUrl,
@@ -163,7 +205,6 @@ class _MateriScreenState extends State<MateriScreen> {
 
     _cancelToken = CancelToken();
 
-    // 🔥 NORMALISASI URL (pakai ApiService)
     String url = rawUrl.trim();
     if (url.startsWith('/')) {
       url = ApiService.baseDomain + url;
@@ -208,6 +249,7 @@ class _MateriScreenState extends State<MateriScreen> {
       );
     } catch (e) {
       if (mounted) Navigator.pop(context);
+
       messenger.showSnackBar(SnackBar(content: Text("Gagal download: $e")));
     } finally {
       if (mounted) setState(() => _downloading = false);

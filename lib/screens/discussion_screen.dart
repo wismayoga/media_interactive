@@ -78,11 +78,46 @@ class _DiscussionScreenState extends State<DiscussionScreen> {
                             color: isMe ? Colors.blue : Colors.grey.shade300,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
-                            msg['message'] ?? '',
-                            style: TextStyle(
-                              color: isMe ? Colors.white : Colors.black,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 🔥 NAMA
+                              Text(
+                                isMe ? "Anda" : msg['user']['name'] ?? '',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: isMe ? Colors.white70 : Colors.black54,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              // 💬 PESAN
+                              Text(
+                                msg['message'] ?? '',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isMe ? Colors.white : Colors.black,
+                                ),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              // 🕒 TANGGAL + JAM
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: Text(
+                                  "${msg['sent_at'] ?? ''} • ${msg['sent_time'] ?? ''}",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: isMe
+                                        ? Colors.white70
+                                        : Colors.black45,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );

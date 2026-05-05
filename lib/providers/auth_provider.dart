@@ -44,6 +44,18 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    await ApiService.post("/auth/register", {
+      "name": name,
+      "email": email,
+      "password": password,
+    });
+  }
+
   Future<void> logout() async {
     isLoading = true;
     notifyListeners();
