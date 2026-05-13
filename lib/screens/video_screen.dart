@@ -46,28 +46,33 @@ class VideoScreen extends StatelessWidget {
               },
               child: Column(
                 children: [
-                  Container(
-                    height: 180,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(18),
-                      ),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(18),
                     ),
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.blue.withOpacity(0.35),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Image.network(
+                          "https://img.youtube.com/vi/${video['videoId']}/0.jpg",
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         ),
-                        child: const Icon(
-                          Icons.play_arrow,
-                          size: 54,
-                          color: Colors.white,
+
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withOpacity(0.35),
+                          ),
+                          child: const Icon(
+                            Icons.play_arrow,
+                            size: 54,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
 

@@ -154,7 +154,55 @@ class _ShowPdfScreenState extends State<ShowPdfScreen> {
           const SizedBox(width: 12),
         ],
       ),
+
       body: _buildBody(),
+
+      bottomNavigationBar: _pdfReady
+          ? Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _currentPage > 0
+                          ? () async {
+                              final prevPage = _currentPage - 1;
+                              await _pdfViewController?.setPage(prevPage);
+                            }
+                          : null,
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text("PREV"),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _currentPage < (_pages - 1)
+                          ? () async {
+                              final nextPage = _currentPage + 1;
+                              await _pdfViewController?.setPage(nextPage);
+                            }
+                          : null,
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text("NEXT"),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : null,
     );
   }
 

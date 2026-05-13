@@ -76,13 +76,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // 🔥 HEADER ATAS
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
+              padding: const EdgeInsets.fromLTRB(22, 8, 22, 8),
               decoration: const BoxDecoration(color: Color(0xFF1E96F2)),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      "Hei, ${auth.user?.name ?? 'Siswa'}",
+                      "Dashboard",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 26,
@@ -105,6 +105,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Icons.logout,
                       color: Colors.white,
                       size: 28,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Image.asset(
+                    "assets/images/robot.gif",
+                    width: 120,
+                    height: 120,
+                  ),
+
+                  const SizedBox(width: 14),
+
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "SELAMAT DATANG",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E96F2),
+                            ),
+                          ),
+
+                          Text(
+                            (auth.user?.name ?? 'USER').toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E96F2),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

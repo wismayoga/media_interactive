@@ -73,17 +73,13 @@ class _MateriScreenState extends State<MateriScreen> {
 
                   return Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF1E88E5), Color(0xFF42C5F5)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.25),
+                          color: Colors.black.withOpacity(0.08),
                           blurRadius: 12,
-                          offset: const Offset(0, 8),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -91,40 +87,69 @@ class _MateriScreenState extends State<MateriScreen> {
                       padding: const EdgeInsets.all(14),
                       child: Column(
                         children: [
-                          // 🔥 ICON
-                          Container(
-                            width: 62,
-                            height: 62,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.18),
-                            ),
-                            child: const Icon(
-                              Icons.menu_book_rounded,
-                              color: Colors.white,
-                              size: 32,
-                            ),
+                          const SizedBox(height: 8),
+
+                          // ICON BUKU
+                          const Icon(
+                            Icons.menu_book_rounded,
+                            color: Colors.black87,
+                            size: 34,
                           ),
 
                           const SizedBox(height: 12),
 
+                          // JUDUL
                           Expanded(
-                            child: Text(
-                              item.title,
-                              textAlign: TextAlign.center,
-                              maxLines: 4,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                            child: Center(
+                              child: Text(
+                                item.title,
+                                textAlign: TextAlign.center,
+                                maxLines: 4,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ),
 
                           const SizedBox(height: 10),
 
-                          // 🔥 BUTTON PDF
+                          // TOMBOL DISKUSI
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: item.hasGroup
+                                  ? () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DiscussionScreen(
+                                            groupId: item.groupId!,
+                                            title: item.title,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFEAEAEA),
+                                foregroundColor: Colors.grey.shade700,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              child: const Text("Diskusi"),
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          // TOMBOL PDF
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
@@ -145,43 +170,14 @@ class _MateriScreenState extends State<MateriScreen> {
                                       );
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text("PDF"),
-                            ),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // 🔥 BUTTON DISKUSI
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: item.hasGroup
-                                  ? () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => DiscussionScreen(
-                                            groupId: item.groupId!,
-                                            title: item.title,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.20),
+                                backgroundColor: const Color(0xFF2196F3),
                                 foregroundColor: Colors.white,
+                                elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: const Text("Diskusi"),
+                              child: const Text("Show PDF"),
                             ),
                           ),
                         ],
